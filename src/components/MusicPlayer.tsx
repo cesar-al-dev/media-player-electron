@@ -14,7 +14,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [progress, setProgress] = useState(0);
-    const [volume, setVolume] = useState(1); // Default volume is 1 (max volume)
+    const [volume, setVolume] = useState(1);
     const [isMuted, setIsMuted] = useState(false);
 
     useEffect(() => {
@@ -121,21 +121,19 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
                 let analyser = analyserRef.current;
             
                 if (!audioContext) {
-                audioContext = new (window.AudioContext)();
-                audioContextRef.current = audioContext;
+                    audioContext = new (window.AudioContext)();
+                    audioContextRef.current = audioContext;
                 }
             
                 if (!analyser) {
-                analyser = audioContext.createAnalyser();
-                analyserRef.current = analyser;
+                    analyser = audioContext.createAnalyser();
+                    analyserRef.current = analyser;
                 }
             
                 const source = audioContext.createMediaElementSource(audio);
-            
-                // Disconnect any existing connections
+
                 source.disconnect();
-            
-                // Connect to new destination
+                
                 source.connect(analyser);
                 source.connect(audioContext.destination);
             
@@ -148,24 +146,35 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
                 canvas.height = canvas.offsetHeight;
             
                 const draw = () => {
-                animationFrameRef.current = requestAnimationFrame(draw);
-            
-                analyser!.getByteFrequencyData(dataArray);
-            
-                ctx.fillStyle = 'rgb(0, 0, 0)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-                const barWidth = (canvas.width / bufferLength) * 2.5;
-                let x = 0;
-            
-                dataArray.forEach((item) => {
-                    const barHeight = item;
-            
-                    ctx.fillStyle = `rgb(${barHeight + 100},50,50)`;
-                    ctx.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
-            
-                    x += barWidth + 1;
-                });
+                    animationFrameRef.current = requestAnimationFrame(draw);
+                
+                    analyser!.getByteFrequencyData(dataArray);
+                
+                    ctx.fillStyle = 'rgb(0, 0, 0)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                    const barWidth = (canvas.width / bufferLength) * 2.5;
+                    let x = 0;
+                
+                    // Draw bars going upwards
+                    ctx.fillStyle = 'rgb(100, 0, 0)';
+                    for (let i = 0; i < bufferLength / 2; i++) {
+                      const barHeight = dataArray[i];
+                
+                      ctx.fillRect(x, canvas.height / 2, barWidth, -(barHeight / 2));
+                      x += barWidth + 1;
+                    }
+                
+                    // Draw bars going downwards mirroring the top bars vertically
+                    x = 0;
+                    ctx.fillStyle = 'rgb(0, 100, 0)';
+                    for (let i = 0; i < bufferLength / 2; i++) {
+                      const barHeight = dataArray[i];
+                
+                      ctx.fillRect(x, canvas.height / 2, barWidth, barHeight / 2);
+                      ctx.fillRect(x, canvas.height / 2, barWidth, -(barHeight / 2));
+                      x += barWidth + 1;
+                    }
                 };
             
                 if (!isAudioConnectedRef.current) {
@@ -186,7 +195,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
             if (animationFrameRef.current) {
                 cancelAnimationFrame(animationFrameRef.current);
             }
-
             if (audioContextRef.current) {
                 audioContextRef.current.close().catch((error) => console.error('Failed to close audio context:', error));
             }
@@ -194,7 +202,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
     }, [src]);
 
     return (
-        <div style={{width: '100%'}}>
+        <div style={{height:'80vh'}}>
             <canvas ref={canvasRef} className='media-player'/>
             <audio 
                 ref={audioRef} 
