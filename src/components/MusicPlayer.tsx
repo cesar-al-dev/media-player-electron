@@ -202,7 +202,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
     }, [src]);
 
     return (
-        <div style={{height:'80vh'}}>
+        <div style={{height:'90vh', width:'90vw'}}>
             <canvas ref={canvasRef} className='media-player'/>
             <audio 
                 ref={audioRef} 

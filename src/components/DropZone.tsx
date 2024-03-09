@@ -22,21 +22,30 @@ const DropZone: React.FC<DropZoneProps> = ({ onFileSelected }) => {
     setIsDragging(false);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>): void => {
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>): Promise<void> => {
     e.preventDefault();
     setIsDragging(false);
-
+  
     const droppedFile: File = e.dataTransfer.files[0];
     const ext = droppedFile.name.split('.').pop()?.toLowerCase() || '';
-    const isVideo = ext === 'mp4';
-
+    const supportedVideoExtensions = ['mp4', 'webm', 'ogg'];
+  
+    const isVideo = supportedVideoExtensions.includes(ext);
+  
     const reader = new FileReader();
-    reader.onload = (event) => {
-      const url = event.target?.result as string;
-      onFileSelected(url, isVideo);
-    };
-    reader.readAsDataURL(droppedFile);
+    await new Promise<void>((resolve, reject) => {
+      reader.onload = (event) => {
+        const url = event.target?.result as string;
+        onFileSelected(url, isVideo);
+        resolve();
+      };
+      reader.onerror = () => {
+        reject(new Error('Failed to read file'));
+      };
+      reader.readAsDataURL(droppedFile);
+    });
   };
+  
 
   return (
     <div
@@ -48,8 +57,11 @@ const DropZone: React.FC<DropZoneProps> = ({ onFileSelected }) => {
         border: isDragging ? '2px dashed blue' : '2px solid black',
         padding: '20px',
         textAlign: 'center',
-        width: '100vw', // Set width to 100% of viewport width
-        height: '200px', // Set height as needed
+        alignItems:'center',
+        justifyContent:'center',
+        width: '80vh',
+        height: '50vh',
+        display:'flex',
       }}
     >
       <h2>Drag & Drop File Here</h2>
