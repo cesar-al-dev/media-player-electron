@@ -107,17 +107,16 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => {
   };
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div className='media-player'>
       <video
         className='video-player'
         src={src}
         ref={videoRef}
         controls={false}
-        style={{ width: '100%', height: '100%' }}
         onClick={togglePlayPause}
         onDoubleClick={toggleFullScreen}
       />
-      <div className='custom-controls' style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0, 0, 0, 0.5)', padding: '10px', color: '#fff' }}>
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0, 0, 0, 0.5)', color: '#fff' , width: '100%',}}>
         <div onClick={handleProgressClick} style={{ width: '100%', height: '5px', background: '#fff', marginBottom: '10px' }}>
           <div style={{ width: `${progress}%`, height: '100%', background: 'blue' }} />
         </div>

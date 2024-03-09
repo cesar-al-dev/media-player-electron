@@ -1,12 +1,25 @@
+import MusicPlayer from './components/MusicPlayer';
 import VideoPlayer from './components/VideoPlayer';
 import { useEffect, useState } from 'react';
 
 function App() {
   const [filePath, setFilePath] = useState<string | null>(null);
+  const [isVideo, setIsVideo] = useState(true);
 
   useEffect(() => {
-    const handleFileSelected = (_event: any, path: string) => {
-      setFilePath(path);
+    const handleFileSelected = (_event: any, url: string, ext: string) => {
+      setFilePath(url);
+      switch (ext) {
+        case "mp3":
+          setIsVideo(false);
+          break;
+        case "mp4":
+          setIsVideo(true);
+          break;
+        default:
+          setIsVideo(false);
+          break;
+      }
     };
 
     window.ipcRenderer.on('file-selected', handleFileSelected);
@@ -18,8 +31,15 @@ function App() {
   }, []);
 
   return (
-    <div className="App">
-      <VideoPlayer src={filePath!} />
+    <div>
+      {
+        filePath != null?
+          isVideo == true? 
+            <VideoPlayer src={filePath!}/>
+            : 
+            <MusicPlayer src={filePath!}></MusicPlayer>
+        : <>Select a file</>
+      }
     </div>
   );
 }

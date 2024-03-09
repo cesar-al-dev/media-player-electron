@@ -69,15 +69,25 @@ const template: MenuItemConstructorOptions[] = [
       {
         label: 'Open File',
         click: async () => {
-          const { filePaths } = await dialog.showOpenDialog({ properties: ['openFile'] });
+          const { filePaths } = await dialog.showOpenDialog({
+            properties: ['openFile'],
+            filters: [{'name':'Select Media File', 'extensions':['mp4','mp3']}]
+          });
           if (filePaths && filePaths.length > 0) {
             const filePath = filePaths[0];
             const videoURL = `file://${filePath}`;
-            win?.webContents.send('file-selected', videoURL);
+            const fileExtension = filePath.split('.').pop();
+            win?.webContents.send('file-selected', videoURL, fileExtension);
           }
         
         },
       },
+      {
+        label:'Close',
+        click: () => {
+          app.quit()
+        }
+      }
     ],
   },
   {
