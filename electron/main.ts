@@ -1,6 +1,5 @@
 import { app, BrowserWindow, dialog, Menu, MenuItemConstructorOptions } from 'electron'
 import path from 'node:path'
-import fs from 'node:fs'
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -23,6 +22,9 @@ function createWindow() {
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: true,
+      allowRunningInsecureContent: true,
+      webSecurity: false,
     },
   })
 
@@ -64,28 +66,34 @@ const template: MenuItemConstructorOptions[] = [
   {
     label: 'File',
     submenu: [
-      { label: 'Open',
+      {
+        label: 'Open File',
         click: async () => {
-          // Open a file dialog to select a file
-          const { filePaths } = await dialog.showOpenDialog({
-            properties: ['openFile'],
-            filters:[{'name':'Media Files', 'extensions':['mp4']}]
-          });
-          
+          const { filePaths } = await dialog.showOpenDialog({ properties: ['openFile'] });
           if (filePaths && filePaths.length > 0) {
-            // Read the file
-            fs.readFile(filePaths[0], 'utf-8', (err, data) => {
-              if (err) {
-                console.error('Error reading file:', err);
-                return;
-              }
-              console.log('File content:');
-            });
-        }}
+            const filePath = filePaths[0];
+            const videoURL = `file://${filePath}`;
+            win?.webContents.send('file-selected', videoURL);
+          }
+        
+        },
       },
-      { label: 'Quit', role: 'quit' }
+    ],
+  },
+  {
+    label: 'View',
+    submenu: [
+      { role: 'reload' },
+      { role: 'forceReload' },
+      { role: 'toggleDevTools' },
+      { type: 'separator' },
+      { role: 'resetZoom' },
+      { role: 'zoomIn' },
+      { role: 'zoomOut' },
+      { type: 'separator' },
+      { role: 'togglefullscreen' }
     ]
-  }
+  },
 ];
 
 const menu = Menu.buildFromTemplate(template);
