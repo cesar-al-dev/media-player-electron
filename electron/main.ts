@@ -23,7 +23,7 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
-      // devTools: false,
+      devTools: false,
       allowRunningInsecureContent: true,
       webSecurity: false,
     },
@@ -68,11 +68,14 @@ ipcMain.on('toggle-fullscreen', () => {
   if (mainWindow) {
     if (mainWindow.isFullScreen()) {
       mainWindow.setFullScreen(false);
+      mainWindow.setMenuBarVisibility(true);
     } else {
       mainWindow.setFullScreen(true);
+      mainWindow.setMenuBarVisibility(false);
     }
   }
 });
+
 
 
 
@@ -85,15 +88,6 @@ const template: MenuItemConstructorOptions[] = [
         click: async () => {
           const { filePaths } = await dialog.showOpenDialog({
             properties: ['openFile'],
-            filters: [{'name':'Select Media File', 'extensions':[
-              'mp4',
-              'mp3',
-              'Ogg',
-              'WebM',
-              'WAV',
-              'FLAC',
-              'Opus', 
-            ]}]
           });
           if (filePaths && filePaths.length > 0) {
             const filePath = filePaths[0];
@@ -115,13 +109,6 @@ const template: MenuItemConstructorOptions[] = [
     label: 'View',
     submenu: [
       { role: 'reload' },
-      { role: 'forceReload' },
-      { role: 'toggleDevTools' },
-      { type: 'separator' },
-      { role: 'resetZoom' },
-      { role: 'zoomIn' },
-      { role: 'zoomOut' },
-      { type: 'separator' },
       { role: 'togglefullscreen' }
     ]
   },
