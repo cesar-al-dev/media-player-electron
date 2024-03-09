@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import CustomControls from './CustomControls';
 
 interface MusicPlayerProps {
   src: string;
@@ -42,18 +43,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
         }
     }, []);
 
-    useEffect(() => {
-        const handleFullScreenChange = () => {
-        setIsFullScreen(!!document.fullscreenElement);
-        };
-
-        document.addEventListener('fullscreenchange', handleFullScreenChange);
-
-        return () => {
-        document.removeEventListener('fullscreenchange', handleFullScreenChange);
-        };
-    }, []);
-
     const togglePlayPause = () => {
         const video = audioRef.current;
         if (video) {
@@ -68,14 +57,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
     };
 
     const toggleFullScreen = () => {
-        const video = audioRef.current;
-        if (video) {
-        if (!isFullScreen) {
-            video.requestFullscreen();
-        } else {
-            document.exitFullscreen();
-        }
-        }
+        window.ipcRenderer.send('toggle-fullscreen');
+        setIsFullScreen(!isFullScreen);
     };
 
     const toggleMute = () => {
@@ -203,7 +186,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
 
     return (
         <div style={{height:'90vh', width:'90vw'}}>
-            <canvas ref={canvasRef} className='media-player'/>
+            <canvas ref={canvasRef} className='media-player' onClick={togglePlayPause}/>
             <audio 
                 ref={audioRef} 
                 src={src} 
@@ -211,26 +194,18 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
                 onClick={togglePlayPause}
                 className='video-player'
             />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0, 0, 0, 0.5)', color: '#fff' , width: '100%',}}>
-                <div onClick={handleProgressClick} style={{ width: '100%', height: '5px', background: '#fff', marginBottom: '10px' }}>
-                    <div style={{ width: `${progress}%`, height: '100%', background: 'blue' }} />
-                </div>
-                <button onClick={togglePlayPause}>
-                    {isPlaying ? 'Pause' : 'Play'}
-                </button>
-                <input
-                    type='range'
-                    min='0'
-                    max='1'
-                    step='0.01'
-                    value={volume}
-                    onChange={handleVolumeChange}
-                />
-                <button onClick={toggleMute}>{isMuted ? 'Unmute' : 'Mute'}</button>
-                <button onClick={toggleFullScreen}>
-                    Full Screen
-                </button>
-            </div>
+            <CustomControls
+                isPlaying={isPlaying}
+                progress={progress}
+                volume={volume}
+                isMuted={isMuted}
+                isFullScreen={isFullScreen}
+                togglePlayPause={togglePlayPause}
+                handleVolumeChange={handleVolumeChange}
+                toggleMute={toggleMute}
+                toggleFullScreen={toggleFullScreen}
+                handleProgressClick={handleProgressClick}
+            />
         </div>
     );
 };

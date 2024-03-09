@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, Menu, MenuItemConstructorOptions } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, Menu, MenuItemConstructorOptions } from 'electron'
 import path from 'node:path'
 // The built directory structure
 //
@@ -23,9 +23,12 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
+      // devTools: false,
       allowRunningInsecureContent: true,
       webSecurity: false,
     },
+    autoHideMenuBar:false,
+    center: true,
   })
 
   // Test active push message to Renderer-process.
@@ -59,6 +62,17 @@ app.on('activate', () => {
     createWindow()
   }
 })
+
+ipcMain.on('toggle-fullscreen', () => {
+  const mainWindow = BrowserWindow.getFocusedWindow();
+  if (mainWindow) {
+    if (mainWindow.isFullScreen()) {
+      mainWindow.setFullScreen(false);
+    } else {
+      mainWindow.setFullScreen(true);
+    }
+  }
+});
 
 
 
