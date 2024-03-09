@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import CustomControls from './CustomControls';
 
 interface MusicPlayerProps {
   src: string;
@@ -14,7 +15,7 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [progress, setProgress] = useState(0);
-    const [volume, setVolume] = useState(1); // Default volume is 1 (max volume)
+    const [volume, setVolume] = useState(1);
     const [isMuted, setIsMuted] = useState(false);
 
     useEffect(() => {
@@ -42,18 +43,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
         }
     }, []);
 
-    useEffect(() => {
-        const handleFullScreenChange = () => {
-        setIsFullScreen(!!document.fullscreenElement);
-        };
-
-        document.addEventListener('fullscreenchange', handleFullScreenChange);
-
-        return () => {
-        document.removeEventListener('fullscreenchange', handleFullScreenChange);
-        };
-    }, []);
-
     const togglePlayPause = () => {
         const video = audioRef.current;
         if (video) {
@@ -68,14 +57,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
     };
 
     const toggleFullScreen = () => {
-        const video = audioRef.current;
-        if (video) {
-        if (!isFullScreen) {
-            video.requestFullscreen();
-        } else {
-            document.exitFullscreen();
-        }
-        }
+        window.ipcRenderer.send('toggle-fullscreen');
+        setIsFullScreen(!isFullScreen);
     };
 
     const toggleMute = () => {
@@ -121,21 +104,19 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
                 let analyser = analyserRef.current;
             
                 if (!audioContext) {
-                audioContext = new (window.AudioContext)();
-                audioContextRef.current = audioContext;
+                    audioContext = new (window.AudioContext)();
+                    audioContextRef.current = audioContext;
                 }
             
                 if (!analyser) {
-                analyser = audioContext.createAnalyser();
-                analyserRef.current = analyser;
+                    analyser = audioContext.createAnalyser();
+                    analyserRef.current = analyser;
                 }
             
                 const source = audioContext.createMediaElementSource(audio);
-            
-                // Disconnect any existing connections
+
                 source.disconnect();
-            
-                // Connect to new destination
+                
                 source.connect(analyser);
                 source.connect(audioContext.destination);
             
@@ -148,24 +129,35 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
                 canvas.height = canvas.offsetHeight;
             
                 const draw = () => {
-                animationFrameRef.current = requestAnimationFrame(draw);
-            
-                analyser!.getByteFrequencyData(dataArray);
-            
-                ctx.fillStyle = 'rgb(0, 0, 0)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-                const barWidth = (canvas.width / bufferLength) * 2.5;
-                let x = 0;
-            
-                dataArray.forEach((item) => {
-                    const barHeight = item;
-            
-                    ctx.fillStyle = `rgb(${barHeight + 100},50,50)`;
-                    ctx.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
-            
-                    x += barWidth + 1;
-                });
+                    animationFrameRef.current = requestAnimationFrame(draw);
+                
+                    analyser!.getByteFrequencyData(dataArray);
+                
+                    ctx.fillStyle = 'rgb(0, 0, 0)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                    const barWidth = (canvas.width / bufferLength) * 2.5;
+                    let x = 0;
+                
+                    // Draw bars going upwards
+                    ctx.fillStyle = 'rgb(100, 0, 0)';
+                    for (let i = 0; i < bufferLength / 2; i++) {
+                      const barHeight = dataArray[i];
+                
+                      ctx.fillRect(x, canvas.height / 2, barWidth, -(barHeight / 2));
+                      x += barWidth + 1;
+                    }
+                
+                    // Draw bars going downwards mirroring the top bars vertically
+                    x = 0;
+                    ctx.fillStyle = 'rgb(0, 100, 0)';
+                    for (let i = 0; i < bufferLength / 2; i++) {
+                      const barHeight = dataArray[i];
+                
+                      ctx.fillRect(x, canvas.height / 2, barWidth, barHeight / 2);
+                      ctx.fillRect(x, canvas.height / 2, barWidth, -(barHeight / 2));
+                      x += barWidth + 1;
+                    }
                 };
             
                 if (!isAudioConnectedRef.current) {
@@ -186,7 +178,6 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
             if (animationFrameRef.current) {
                 cancelAnimationFrame(animationFrameRef.current);
             }
-
             if (audioContextRef.current) {
                 audioContextRef.current.close().catch((error) => console.error('Failed to close audio context:', error));
             }
@@ -194,8 +185,8 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
     }, [src]);
 
     return (
-        <div style={{width: '100%'}}>
-            <canvas ref={canvasRef} className='media-player'/>
+        <div style={{height:'90vh', width:'90vw'}}>
+            <canvas ref={canvasRef} className='media-player' onClick={togglePlayPause}/>
             <audio 
                 ref={audioRef} 
                 src={src} 
@@ -203,26 +194,18 @@ const MusicPlayer: React.FC<MusicPlayerProps> = ({ src }) => {
                 onClick={togglePlayPause}
                 className='video-player'
             />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0, 0, 0, 0.5)', color: '#fff' , width: '100%',}}>
-                <div onClick={handleProgressClick} style={{ width: '100%', height: '5px', background: '#fff', marginBottom: '10px' }}>
-                    <div style={{ width: `${progress}%`, height: '100%', background: 'blue' }} />
-                </div>
-                <button onClick={togglePlayPause}>
-                    {isPlaying ? 'Pause' : 'Play'}
-                </button>
-                <input
-                    type='range'
-                    min='0'
-                    max='1'
-                    step='0.01'
-                    value={volume}
-                    onChange={handleVolumeChange}
-                />
-                <button onClick={toggleMute}>{isMuted ? 'Unmute' : 'Mute'}</button>
-                <button onClick={toggleFullScreen}>
-                    Full Screen
-                </button>
-            </div>
+            <CustomControls
+                isPlaying={isPlaying}
+                progress={progress}
+                volume={volume}
+                isMuted={isMuted}
+                isFullScreen={isFullScreen}
+                togglePlayPause={togglePlayPause}
+                handleVolumeChange={handleVolumeChange}
+                toggleMute={toggleMute}
+                toggleFullScreen={toggleFullScreen}
+                handleProgressClick={handleProgressClick}
+            />
         </div>
     );
 };

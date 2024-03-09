@@ -1,13 +1,28 @@
 {
   "name": "media-player-electron",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
+  "description": "My Electron Media Player",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
     "build:win": "tsc && vite build && electron-builder --win",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
+  },
+  "build":{
+    "appId": "my-app",
+    "win": {
+      "target":[
+        "nsis"
+      ]
+    }
+  },
+  "nsis":{
+    "oneClick": false,
+    "uninstallDisplayName": "electron-media-player-uninstaller",
+    "license": "LICENSE",
+    "allowToChangeInstallationDirectory": false
   },
   "dependencies": {
     "react": "^18.2.0",

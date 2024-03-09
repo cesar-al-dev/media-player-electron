@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, Menu, MenuItemConstructorOptions } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, Menu, MenuItemConstructorOptions } from 'electron'
 import path from 'node:path'
 // The built directory structure
 //
@@ -23,9 +23,12 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
+      // devTools: false,
       allowRunningInsecureContent: true,
       webSecurity: false,
     },
+    autoHideMenuBar:false,
+    center: true,
   })
 
   // Test active push message to Renderer-process.
@@ -60,6 +63,17 @@ app.on('activate', () => {
   }
 })
 
+ipcMain.on('toggle-fullscreen', () => {
+  const mainWindow = BrowserWindow.getFocusedWindow();
+  if (mainWindow) {
+    if (mainWindow.isFullScreen()) {
+      mainWindow.setFullScreen(false);
+    } else {
+      mainWindow.setFullScreen(true);
+    }
+  }
+});
+
 
 
 const template: MenuItemConstructorOptions[] = [
@@ -71,7 +85,15 @@ const template: MenuItemConstructorOptions[] = [
         click: async () => {
           const { filePaths } = await dialog.showOpenDialog({
             properties: ['openFile'],
-            filters: [{'name':'Select Media File', 'extensions':['mp4','mp3']}]
+            filters: [{'name':'Select Media File', 'extensions':[
+              'mp4',
+              'mp3',
+              'Ogg',
+              'WebM',
+              'WAV',
+              'FLAC',
+              'Opus', 
+            ]}]
           });
           if (filePaths && filePaths.length > 0) {
             const filePath = filePaths[0];
@@ -81,12 +103,11 @@ const template: MenuItemConstructorOptions[] = [
           }
         
         },
+        accelerator:'Ctrl + O'
       },
       {
         label:'Close',
-        click: () => {
-          app.quit()
-        }
+        role:'quit'
       }
     ],
   },

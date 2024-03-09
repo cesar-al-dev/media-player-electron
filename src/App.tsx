@@ -1,3 +1,4 @@
+import DropZone from './components/DropZone';
 import MusicPlayer from './components/MusicPlayer';
 import VideoPlayer from './components/VideoPlayer';
 import { useEffect, useState } from 'react';
@@ -31,16 +32,14 @@ function App() {
   }, []);
 
   return (
-    <div>
-      {
-        filePath != null?
-          isVideo == true? 
-            <VideoPlayer src={filePath!}/>
-            : 
-            <MusicPlayer src={filePath!}></MusicPlayer>
-        : <>Select a file</>
-      }
+    <div style={{width:'100%', alignItems:'center', display:'flex', justifyContent:'center'}}>
+      {filePath != null ? (
+        isVideo ? <VideoPlayer src={filePath} /> : <MusicPlayer src={filePath} />
+      ) : (
+        <DropZone onFileSelected={(url, isVideo) => { setFilePath(url); setIsVideo(isVideo); }} />
+      )}
     </div>
+
   );
 }
 
