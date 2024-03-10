@@ -1,5 +1,6 @@
 {
   "name": "media-player-electron",
+  "productName": "ElectronMediaPlayer",
   "private": true,
   "version": "0.0.1",
   "description": "My Electron Media Player",
@@ -10,7 +11,8 @@
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
-  "build":{
+  "build:win":{
+    "productName":"ElectronMediaPlayer",
     "appId": "my-app",
     "win": {
       "target":[

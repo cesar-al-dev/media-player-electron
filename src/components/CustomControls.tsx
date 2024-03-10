@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface CustomControlsProps {
   isPlaying: boolean;
@@ -25,24 +25,63 @@ const CustomControls: React.FC<CustomControlsProps> = ({
   isFullScreen,
   handleProgressClick,
 }) => {
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    function hideItems() {
+      setIsVisible(false);
+    }
+
+    function resetTimeout() {
+      clearTimeout(timeoutId);
+      setIsVisible(true);
+      timeoutId = setTimeout(hideItems, 3000);
+    }
+
+    const onMouseMove = () => {
+      resetTimeout();
+    };
+
+    const onKeyPress = () => {
+      resetTimeout();
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('keypress', onKeyPress);
+
+    resetTimeout();
+
+    return () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('keypress', onKeyPress);
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
   return (
-    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0, 0, 0, 0.5)', color: '#fff', width: '100%', }}>
-      <div onClick={handleProgressClick} style={{ width: '100%', height: '5px', background: '#fff', marginBottom: '10px' }}>
+    <div className={`controls ${isVisible ? 'visible' : 'hidden'}`}>
+      <div onClick={handleProgressClick} className={`progress-bar-empty`}>
         <div style={{ width: `${progress}%`, height: '100%', background: 'blue' }} />
       </div>
-      <button onClick={togglePlayPause}>
-        {isPlaying ? 'Pause' : 'Play'}
-      </button>
-      <input
-        type='range'
-        min='0'
-        max='1'
-        step='0.01'
-        value={volume}
-        onChange={handleVolumeChange}
-      />
-      <button onClick={toggleMute}>{isMuted ? 'Unmute' : 'Mute'}</button>
-      <button onClick={toggleFullScreen}>{isFullScreen ? 'Exit FullScreen' : 'FullScreen'}</button>
+      <div className='custom-controls'>
+        <div>
+          <button onClick={togglePlayPause} style={{ width: '100px' }}>
+            {isPlaying ? 'Pause' : 'Play'}
+          </button>
+          <input
+            type='range'
+            min='0'
+            max='1'
+            step='0.01'
+            value={volume}
+            onChange={handleVolumeChange}
+          />
+          <button onClick={toggleMute}>{isMuted ? 'Unmute' : 'Mute'}</button>
+        </div>
+        <button onClick={toggleFullScreen}>{isFullScreen ? 'Exit FullScreen' : 'FullScreen'}</button>
+      </div>
     </div>
   );
 };

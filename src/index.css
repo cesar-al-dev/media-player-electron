@@ -33,6 +33,8 @@ body {
   width: 100%;
   padding: 0;
   min-height: 90vh;
+  overflow-y: hidden;
+  overflow-x: hidden;
 }
 
 h1 {
@@ -82,4 +84,42 @@ button:focus-visible {
   height: 90%;
   object-fit: fill;
   overflow: auto;
+}
+
+.controls{
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff; 
+  width: 100%;
+  transition: opacity 0.5s ease;
+
+}
+.custom-controls{
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff; 
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.progress-bar-empty{
+   width: 100%;
+  height: 5px;
+  background: #fff;
+  margin-bottom: 10px; 
+}
+
+.visible {
+  opacity: 1;
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
