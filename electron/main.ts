@@ -23,7 +23,7 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
-      devTools: false,
+      // devTools: false,
       allowRunningInsecureContent: true,
       webSecurity: false,
     },
@@ -109,7 +109,8 @@ const template: MenuItemConstructorOptions[] = [
     label: 'View',
     submenu: [
       { role: 'reload' },
-      { role: 'togglefullscreen' }
+      { role: 'togglefullscreen' },
+      { role: 'toggleDevTools'}
     ]
   },
 ];
