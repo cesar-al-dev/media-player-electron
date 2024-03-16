@@ -8,21 +8,13 @@ function App() {
   const [isVideo, setIsVideo] = useState(true);
 
   useEffect(() => {
-    const handleFileSelected = (_event: any, url: string, ext: string) => {
+    const handleFileSelected = (_event: Electron.Event, url: string, ext: string) => {
       setFilePath(url);
-      switch (ext) {
-        case "mp3":
-          setIsVideo(false);
-          break;
-        case "mp4":
-          setIsVideo(true);
-          break;
-        default:
-          setIsVideo(false);
-          break;
-      }
+      const supportedVideoExtensions = ['mp4', 'webm', 'ogg'];
+      setIsVideo(supportedVideoExtensions.includes(ext));
     };
 
+    window.ipcRenderer.send('get-file-data');
     window.ipcRenderer.on('file-selected', handleFileSelected);
 
     return () => {

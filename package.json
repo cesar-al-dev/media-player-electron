@@ -2,7 +2,7 @@
   "name": "media-player-electron",
   "productName": "ElectronMediaPlayer",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "My Electron Media Player",
   "scripts": {
     "dev": "vite",
@@ -24,7 +24,8 @@
     "oneClick": false,
     "uninstallDisplayName": "electron-media-player-uninstaller",
     "license": "LICENSE",
-    "allowToChangeInstallationDirectory": false
+    "allowToChangeInstallationDirectory": false,
+    "per_system": true
   },
   "dependencies": {
     "react": "^18.2.0",

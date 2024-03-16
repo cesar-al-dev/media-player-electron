@@ -42,6 +42,13 @@ function createWindow() {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(process.env.DIST, 'index.html'))
   }
+
+  ipcMain.on('get-file-data', (_event) => {
+    if (process.platform === 'win32' && process.argv.length >= 2 && process.argv[1] !== '.') {
+      const openFilePath = process.argv[1];
+      openFile([openFilePath]);
+    }
+  });
   
 }
 
@@ -78,6 +85,14 @@ ipcMain.on('toggle-fullscreen', () => {
 
 
 
+function openFile(filePaths: string[]) {
+  if (filePaths && filePaths.length > 0) {
+    const filePath = filePaths[0];
+    const videoURL = `file://${filePath}`;
+    const fileExtension = filePath.split('.').pop();
+    win?.webContents.send('file-selected', videoURL, fileExtension);
+  }
+}
 
 const template: MenuItemConstructorOptions[] = [
   {
@@ -89,12 +104,7 @@ const template: MenuItemConstructorOptions[] = [
           const { filePaths } = await dialog.showOpenDialog({
             properties: ['openFile'],
           });
-          if (filePaths && filePaths.length > 0) {
-            const filePath = filePaths[0];
-            const videoURL = `file://${filePath}`;
-            const fileExtension = filePath.split('.').pop();
-            win?.webContents.send('file-selected', videoURL, fileExtension);
-          }
+          openFile(filePaths);
         
         },
         accelerator:'Ctrl + O'
