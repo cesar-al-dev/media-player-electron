@@ -22,6 +22,11 @@ For reference check: https://developer.mozilla.org/en-US/docs/Web/Media/Formats/
 **Client:** Electron, React, Vite, TypeScript.
 
 
+## Demo
+
+![Demo](https://github.com/cesar-al-dev/media-player-electron/assets/131826469/7a88067e-08a4-44b5-9cf2-49af60f97bd4)
+
+
 ## Run Locally
 
 Clone the project
