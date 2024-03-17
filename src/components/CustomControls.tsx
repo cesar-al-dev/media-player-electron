@@ -32,9 +32,11 @@ const CustomControls: React.FC<CustomControlsProps> = ({
 
     function hideItems() {
       setIsVisible(false);
+      document.documentElement.style.cursor = 'none'
     }
 
     function resetTimeout() {
+      document.documentElement.style.cursor = 'auto'
       clearTimeout(timeoutId);
       setIsVisible(true);
       timeoutId = setTimeout(hideItems, 3000);

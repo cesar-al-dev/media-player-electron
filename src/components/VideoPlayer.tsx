@@ -27,13 +27,83 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => {
       setIsMuted(video ? video.muted : false);
     };
 
+    const handleKeyPress = (ev: KeyboardEvent) => {
+      const currentTime = video ? video.currentTime : 0;
+      const duration = video ? video.duration : 0;
+      switch (ev.key.toLowerCase()) {
+        case 'escape':
+          if (isFullScreen === true) {
+            toggleFullScreen();
+          }
+          break;
+
+        case ' ':
+          togglePlayPause();
+          break;
+
+        case 'p':
+          togglePlayPause();
+          break;
+        
+        case 'm':
+          toggleMute();
+          break;
+
+        case 'f':
+          toggleFullScreen();
+          break;
+
+        case 'arrowup':
+          if (video) {
+            if (video?.volume + 0.1 >= 1) {
+              setVolume(video ? video!.volume = 1 : 0);
+            } else {
+              setVolume(video? video!.volume = video!.volume + 0.1 : 0);
+            }
+          }
+          break;
+
+        case 'arrowdown':
+          if (video) {
+            if (video.volume - 0.1 <= 0){
+              setVolume(video? video!.volume = 0 : 0);
+            } else {
+              setVolume(video? video!.volume = video!.volume - 0.1 : 0);
+            }
+          }
+          break;
+
+        case 'arrowright':
+          setProgress(((currentTime + 10) / duration) * 100);
+          if (video) {
+            video!.currentTime = currentTime + 10;
+          }
+          break;
+
+        case 'arrowleft':
+          setProgress(((currentTime - 10) / duration) * 100);
+          if (video) {
+            video!.currentTime = currentTime - 10;
+          }
+          break;
+
+        default:
+          break;
+      }
+    }
+  
+    
+    
+
     if (video) {
       video.addEventListener('timeupdate', handleTimeUpdate);
       video.addEventListener('volumechange', handleVolumeChange);
+      document.addEventListener('keydown', handleKeyPress);
 
       return () => {
         video.removeEventListener('timeupdate', handleTimeUpdate);
         video.removeEventListener('volumechange', handleVolumeChange);
+        document.removeEventListener('keydown', handleKeyPress);
       };
     }
 
@@ -82,6 +152,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => {
       const percent = offsetX / width;
       const duration = video.duration;
       const newTime = percent * duration;
+      console.log(percent, newTime)
       video.currentTime = newTime;
     }
   };
