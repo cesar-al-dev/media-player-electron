@@ -42,7 +42,7 @@
     "eslint-plugin-react-refresh": "^0.4.3",
     "typescript": "^5.2.2",
     "vite": "^4.5.3",
-    "electron": "^26.1.0",
+    "electron": "^28.3.2",
     "electron-builder": "^24.6.4",
     "vite-plugin-electron": "^0.14.0",
     "vite-plugin-electron-renderer": "^0.14.5"
